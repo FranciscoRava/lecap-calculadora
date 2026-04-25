@@ -25,7 +25,7 @@ de lo que haga el tipo de cambio.
 Ingresá el precio de la letra, valor al vencimiento, nominales, 
 tipo de cambio spot, precio del dólar futuro y comisiones de tu broker.
 
-[→ Abrir calculadora](https://tuusuario.github.io/lecap-calculadora)
+[→ Abrir calculadora](https://FranciscoRava.github.io/lecap-calculadora)
 
 ## Aclaración
 

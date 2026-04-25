@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LECAP Carry — Calculadora de Renta en USD</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b0d11;
+  --bg2:      #111318;
+  --bg3:      #181b23;
+  --bg4:      #1f2330;
+  --bg5:      #262b3a;
+  --gold:     #d4a843;
+  --gold2:    #edc464;
+  --gold-dim: rgba(212,168,67,0.1);
+  --green:    #34d9a5;
+  --green2:   #1aab7e;
+  --green-dim:rgba(52,217,165,0.1);
+  --red:      #f07070;
+  --red-dim:  rgba(240,112,112,0.1);
+  --blue:     #6b9cf5;
+  --blue-dim: rgba(107,156,245,0.1);
+  --text:     #e4e6f0;
+  --text2:    #878ba6;
+  --text3:    #4e5268;
+  --border:   rgba(255,255,255,0.055);
+  --border2:  rgba(255,255,255,0.1);
+  --r:        14px;
+  --r-sm:     8px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ambient glow */
+.glow-top {
+  position: fixed; top: -300px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(212,168,67,0.05) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+.glow-bot {
+  position: fixed; bottom: -300px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(52,217,165,0.04) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+
+.wrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 52px 24px 100px;
+  position: relative; z-index: 1;
+}
+
+/* ── HEADER ── */
+header { margin-bottom: 52px; animation: fadeUp .5s ease both; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(212,168,67,0.18);
+  border-radius: 100px;
+  padding: 4px 13px;
+  font-size: 11px; font-weight: 500;
+  color: var(--gold); letter-spacing: .09em;
+  margin-bottom: 22px;
+}
+.eyebrow::before {
+  content:''; width:6px; height:6px;
+  background: var(--gold); border-radius:50%;
+  animation: blink 2.2s ease-in-out infinite;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(38px, 7vw, 64px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+}
+h1 em { font-style: italic; color: var(--gold); }
+
+.subtitle {
+  font-size: 15px; color: var(--text2);
+  font-weight: 300; line-height: 1.7;
+  max-width: 500px;
+}
+
+/* ── STRATEGY PILLS ── */
+.strategy {
+  display: flex; gap: 10px; margin-bottom: 36px; flex-wrap: wrap;
+  animation: fadeUp .5s .1s ease both; opacity: 0;
+}
+.pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 100px; padding: 8px 14px;
+  font-size: 12px; color: var(--text2);
+}
+.pill .num {
+  width: 20px; height: 20px;
+  background: var(--gold-dim); border-radius: 50%;
+  display: flex; align-items:center; justify-content:center;
+  font-size: 10px; font-weight: 600; color: var(--gold);
+}
+
+/* ── SECTION CARD ── */
+.section { margin-bottom: 20px; animation: fadeUp .5s ease both; opacity:0; }
+.s1{animation-delay:.1s} .s2{animation-delay:.15s} .s3{animation-delay:.2s}
+.s4{animation-delay:.22s} .s5{animation-delay:.25s} .s6{animation-delay:.28s}
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 26px 28px;
+  transition: border-color .25s;
+}
+.card:hover { border-color: var(--border2); }
+
+.sec-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .1em; color: var(--text3);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-label span {
+  background: var(--bg4); border-radius: 4px;
+  padding: 2px 7px; color: var(--text2); font-size: 10px;
+}
+.sec-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── INPUTS ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label { font-size: 11px; color: var(--text2); line-height: 1.4; }
+.field label small { display: block; color: var(--text3); font-size: 10px; margin-top: 1px; }
+
+.inp-wrap { position: relative; }
+.inp-wrap .pfx {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3);
+  pointer-events: none;
+}
+.inp-wrap .pfx + input { padding-left: 26px; }
+
+input[type=number] {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; color: var(--text);
+  outline: none;
+  transition: border-color .2s, background .2s;
+  -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type=number]:focus {
+  border-color: rgba(212,168,67,0.5);
+  background: var(--bg4);
+}
+
+/* ── SLIDER ── */
+.slider-row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.slider-row span { font-size: 11px; color: var(--text3); white-space: nowrap; font-family: 'DM Mono', monospace; }
+input[type=range] {
+  flex: 1; -webkit-appearance: none;
+  height: 3px; background: var(--bg5);
+  border: none; border-radius: 2px; cursor: pointer; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 15px; height: 15px;
+  border-radius: 50%; background: var(--gold);
+  cursor: pointer; border: 2px solid var(--bg);
+  transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+/* ── DIVIDER ── */
+.hdiv { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ── BUTTON ── */
+.btn-calc {
+  width: 100%;
+  padding: 17px;
+  background: var(--gold);
+  color: #0b0d11;
+  border: none; border-radius: var(--r);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer; letter-spacing: .02em;
+  transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-calc:hover {
+  background: var(--gold2);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(212,168,67,0.22);
+}
+.btn-calc:active { transform: translateY(0); box-shadow: none; }
+.btn-calc.dirty {
+  animation: pulse-btn 1.8s ease-in-out infinite;
+}
+.btn-calc .arrow { transition: transform .2s; }
+.btn-calc:hover .arrow { transform: translateX(4px); }
+@keyframes pulse-btn {
+  0%,100% { box-shadow: 0 0 0 0 rgba(212,168,67,.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(212,168,67,0); }
+}
+
+/* ── RESULTS ── */
+.result-hero {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
+}
+.hero-box {
+  border-radius: var(--r);
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.hero-box::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.02) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-box.con-futuro {
+  background: linear-gradient(145deg, rgba(52,217,165,0.08), rgba(52,217,165,0.03));
+  border-color: rgba(52,217,165,0.2);
+}
+.hero-box.sin-futuro {
+  background: var(--bg3);
+}
+.hero-label {
+  font-size: 10px; letter-spacing: .1em; font-weight: 600;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.hero-label .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+}
+.hero-label .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.hero-label .dot.gray  { background: var(--text3); }
+.hero-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 32px; font-weight: 500;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hero-sub { font-size: 12px; color: var(--text2); }
+.hero-badge {
+  display: inline-block;
+  background: var(--green-dim);
+  border: 1px solid rgba(52,217,165,0.2);
+  color: var(--green);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .07em;
+  padding: 3px 9px; border-radius: 100px;
+  margin-top: 8px;
+}
+
+.metrics-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;
+}
+.metric {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 14px 16px;
+}
+.m-lbl { font-size: 10px; color: var(--text3); letter-spacing: .07em; margin-bottom: 5px; }
+.m-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 17px; font-weight: 500; color: var(--text);
+  transition: color .3s;
+}
+.m-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+.pos  { color: var(--green) !important; }
+.neg  { color: var(--red)   !important; }
+.gold { color: var(--gold)  !important; }
+.blue { color: var(--blue)  !important; }
+
+/* ── BREAKEVEN ── */
+.be-box {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 16px 18px;
+}
+.be-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px;
+}
+.be-header span { font-size: 12px; color: var(--text2); }
+.be-header strong { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--text); }
+.be-track {
+  height: 5px; background: var(--bg5); border-radius: 3px;
+  overflow: hidden; margin-bottom: 8px;
+}
+.be-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+.be-labels {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace;
+}
+.be-status { font-size: 11px; margin-top: 8px; }
+
+/* ── CASHFLOW ── */
+.cf-table { width: 100%; border-collapse: collapse; }
+.cf-table tr { border-bottom: 1px solid var(--border); }
+.cf-table tr:last-child { border-bottom: none; }
+.cf-table tr:hover { background: rgba(255,255,255,0.015); }
+.cf-table td {
+  padding: 9px 4px; font-size: 12px; color: var(--text2);
+  vertical-align: middle;
+}
+.cf-table td:last-child {
+  text-align: right;
+  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text);
+}
+.cf-table .cf-total td {
+  color: var(--text); font-weight: 500; font-size: 13px; padding-top: 13px;
+}
+.cf-table .cf-total td:first-child::before {
+  content: ''; display: block; height: 1px;
+  background: var(--border2); margin-bottom: 13px;
+}
+.cf-section {
+  font-size: 10px; letter-spacing: .08em; color: var(--text3);
+  padding: 14px 4px 4px; font-weight: 600;
+}
+
+/* ── SCENARIO TABLE ── */
+.sc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sc-table th {
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  color: var(--text3); text-align: right;
+  padding: 0 10px 12px; border-bottom: 1px solid var(--border);
+}
+.sc-table th:first-child { text-align: left; }
+.sc-table td {
+  padding: 9px 10px; text-align: right;
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  border-bottom: 1px solid var(--border); color: var(--text2);
+  transition: background .15s;
+}
+.sc-table td:first-child {
+  text-align: left; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; color: var(--text2);
+}
+.sc-table tr:last-child td { border-bottom: none; }
+.sc-table tr:hover td { background: rgba(255,255,255,0.02); }
+.sc-table tr.row-spot td { background: rgba(212,168,67,0.05); color: var(--text); }
+.sc-table tr.row-be   td { background: rgba(240,112,112,0.05); }
+.sc-table .col-futuro { color: var(--green) !important; }
+
+.tag {
+  display: inline-block; font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  padding: 1px 5px; border-radius: 4px; margin-left: 5px;
+  vertical-align: middle;
+}
+.t-spot   { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(212,168,67,0.2); }
+.t-be     { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(240,112,112,0.2); }
+.t-futuro { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,217,165,0.2); }
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  margin-top: 32px;
+  padding: 18px 22px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 11px; color: var(--text3); line-height: 1.7;
+  animation: fadeUp .5s .35s ease both; opacity: 0;
+}
+.disclaimer strong { color: var(--text2); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:.25; }
+}
+@keyframes numIn {
+  from { opacity:0; transform:translateY(-5px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.num-in { animation: numIn .2s ease both; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .g2,.g3,.g4 { grid-template-columns:1fr; }
+  .result-hero { grid-template-columns:1fr; }
+  .metrics-row { grid-template-columns:1fr 1fr; }
+  .wrap { padding: 32px 16px 60px; }
+  h1 { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+<div class="glow-bot"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="eyebrow">Argentina · Renta Fija</div>
+    <h1>LECAP Carry<br><em>Renta en USD</em></h1>
+    <p class="subtitle">Calculá tu ganancia en dólares combinando Letras del Tesoro con la compra de dólar futuro para fijar el tipo de cambio desde el primer día.</p>
+  </header>
+
+  <!-- STRATEGY PILLS -->
+  <div class="strategy">
+    <div class="pill"><div class="num">1</div> Comprás LECAP en pesos</div>
+    <div class="pill"><div class="num">2</div> Comprás dólar futuro al mismo vencimiento</div>
+    <div class="pill"><div class="num">3</div> Al vencer, cobrás pesos y comprás USD al precio pactado</div>
+  </div>
+
+  <!-- 01 DATOS LETRA -->
+  <div class="section s1">
+    <div class="card">
+      <div class="sec-label">01 <span>DATOS DE LA LETRA</span></div>
+      <div class="g2">
+        <div class="field">
+          <label>Precio de compra (por $100 VN)</label>
+          <div class="inp-wrap"><span class="pfx">$</span>
+            <input type="number" id="precio" value="110.32" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="field">
+          <label>Valor al vencimiento (por $100 VN)</label>
+          <div class="inp-wrap"><span class="pfx">$</span>
+            <input type="number" id="vto" value="117.61" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="field">
+          <label>Nominales a comprar</label>
+          <input type="number" id="nominales" value="2589868" step="1" min="0">
+        </div>
+        <div class="field">
+          <label>Días al vencimiento</label>
+          <input type="number" id="dias" value="99" step="1" min="1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 TIPO DE CAMBIO -->
+  <div class="section s2">
+    <div class="card">
+      <div class="sec-label">02 <span>TIPO DE CAMBIO</span></div>
+      <div class="g2" style="margin-bottom:20px">
+        <div class="field">
+          <label>Dólar MEP hoy (spot)
+            <small>Al que comprás los pesos iniciales</small>
+          </label>
+          <div class="inp-wrap"><span class="pfx">$</span>
+            <input type="number" id="spot" value="1440" step="1" min="1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Precio dólar futuro
+            <small>ROFEX — mismo vencimiento que la letra</small>
+          </label>
+          <div class="inp-wrap"><span class="pfx">$</span>
+            <input type="number" id="futuro" value="1476" step="1" min="1">
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label style="font-size:11px; color:var(--text3); margin-bottom:6px;">
+          TC estimado al vencimiento <em style="color:var(--text3)">(para comparar escenario sin cobertura)</em>
+        </label>
+        <div class="g2" style="align-items:center; gap:14px">
+          <div class="inp-wrap"><span class="pfx">$</span>
+            <input type="number" id="spotfin" value="1440" step="1" min="1">
+          </div>
+          <div>
+            <div class="slider-row">
+              <span>$900</span>
+              <input type="range" id="slider-tc" min="900" max="3000" step="10" value="1440">
+              <span>$3000</span>
+            </div>
+            <div style="text-align:center; font-size:11px; color:var(--gold); font-family:'DM Mono',monospace; margin-top:4px" id="slider-lbl">$1.440</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 COMISIONES -->
+  <div class="section s3">
+    <div class="card">
+      <div class="sec-label">03 <span>COMISIONES DEL BROKER</span></div>
+      <div class="g4">
+        <div class="field">
+          <label>Compra/Venta letras (%)</label>
+          <input type="number" id="comCV" value="1.5" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Amortización (%)</label>
+          <input type="number" id="comAmort" value="0.25" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Renta (%)</label>
+          <input type="number" id="comRenta" value="0" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Futuros (%)</label>
+          <input type="number" id="comFut" value="0.1" step="0.01" min="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTON -->
+  <div class="section s4">
+    <button class="btn-calc" id="btn-calc" onclick="onCalc()">
+      Calcular rendimiento <span class="arrow">→</span>
+    </button>
+  </div>
+
+  <!-- 04 RESULTADO PRINCIPAL -->
+  <div class="section s5">
+    <div class="card">
+      <div class="sec-label">04 <span>RESULTADO</span></div>
+
+      <!-- HERO: con futuro vs sin futuro -->
+      <div class="result-hero">
+        <div class="hero-box con-futuro">
+          <div class="hero-label">
+            <div class="dot green"></div>
+            CON DÓLAR FUTURO — RENTA ASEGURADA
+          </div>
+          <div class="hero-val pos" id="h-gan-futuro">+USD 0</div>
+          <div class="hero-sub" id="h-sub-futuro">—</div>
+          <div class="hero-badge" id="h-tea-futuro">TEA 0%</div>
+        </div>
+        <div class="hero-box sin-futuro">
+          <div class="hero-label">
+            <div class="dot gray"></div>
+            SIN FUTURO — DEPENDE DEL TC
+          </div>
+          <div class="hero-val" id="h-gan-sin" style="color:var(--text)">USD 0</div>
+          <div class="hero-sub" id="h-sub-sin">—</div>
+          <div style="font-size:11px; color:var(--text3); margin-top:8px" id="h-diff">—</div>
+        </div>
+      </div>
+
+      <!-- METRICAS -->
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="m-lbl">USD DESEMBOLSADOS</div>
+          <div class="m-val gold" id="m-usd-hoy">0</div>
+          <div class="m-sub">hoy al spot</div>
+        </div>
+        <div class="metric">
+          <div class="m-lbl">USD AL VENCIMIENTO</div>
+          <div class="m-val" id="m-usd-fin">0</div>
+          <div class="m-sub">vía futuro pactado</div>
+        </div>
+        <div class="metric">
+          <div class="m-lbl">RENTA PERÍODO</div>
+          <div class="m-val pos" id="m-rend-pct">0%</div>
+          <div class="m-sub" id="m-dias-lbl">en 99 días</div>
+        </div>
+      </div>
+
+      <!-- BREAKEVEN -->
+      <div class="be-box">
+        <div class="be-header">
+          <span>Breakeven sin cobertura</span>
+          <strong id="be-val">$0</strong>
+        </div>
+        <div class="be-track"><div class="be-fill" id="be-fill" style="width:50%"></div></div>
+        <div class="be-labels">
+          <span>Spot: <span id="be-spot-lbl">$0</span></span>
+          <span id="be-right-lbl">—</span>
+        </div>
+        <div class="be-status" id="be-status">—</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 05 FLUJO DE CAJA -->
+  <div class="section s5">
+    <div class="card">
+      <div class="sec-label">05 <span>FLUJO DE CAJA DETALLADO</span></div>
+      <table class="cf-table">
+        <tr><td class="cf-section" colspan="2">HOY — ENTRADA</td></tr>
+        <tr>
+          <td>Compra LECAP (nominales × precio/100)</td>
+          <td id="cf-compra">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--red)">− Comisión compra/venta letras</td>
+          <td id="cf-comCV" style="color:var(--red)">—</td>
+        </tr>
+        <tr class="cf-total">
+          <td>💸 Total desembolsado en pesos</td>
+          <td id="cf-total">—</td>
+        </tr>
+        <tr>
+          <td style="padding-top:8px; color:var(--text3); font-size:11px">÷ Dólar spot</td>
+          <td id="cf-usd-hoy" style="color:var(--gold); font-size:12px; padding-top:8px">—</td>
+        </tr>
+
+        <tr><td class="cf-section" colspan="2">AL VENCIMIENTO — PESOS</td></tr>
+        <tr>
+          <td>Cobro LECAP (nominales × VTO/100)</td>
+          <td id="cf-recibo">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--red)">− Comisión amortización</td>
+          <td id="cf-comAmort" style="color:var(--red)">—</td>
+        </tr>
+        <tr class="cf-total">
+          <td>💰 Pesos netos al vencimiento</td>
+          <td id="cf-neto">—</td>
+        </tr>
+
+        <tr><td class="cf-section" colspan="2">AL VENCIMIENTO — DOLARIZACIÓN VÍA FUTURO</td></tr>
+        <tr>
+          <td>Pesos netos ÷ precio futuro pactado</td>
+          <td id="cf-usd-bruto">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--red)">− Comisión futuros</td>
+          <td id="cf-comFut" style="color:var(--red)">—</td>
+        </tr>
+        <tr class="cf-total">
+          <td>✅ USD netos — renta asegurada</td>
+          <td id="cf-usd-neto" class="pos">—</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 06 ESCENARIOS -->
+  <div class="section s6">
+    <div class="card">
+      <div class="sec-label">06 <span>ESCENARIOS — CON VS SIN FUTURO</span></div>
+      <div style="overflow-x:auto">
+        <table class="sc-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Escenario TC al vto.</th>
+              <th>TC</th>
+              <th>Sin futuro<br>USD netos</th>
+              <th>Sin futuro<br>Ganancia</th>
+              <th class="col-futuro">Con futuro<br>USD netos</th>
+              <th class="col-futuro">Con futuro<br>Ganancia</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-sc"></tbody>
+        </table>
+      </div>
+      <p style="font-size:11px; color:var(--text3); margin-top:14px; line-height:1.6">
+        Con dólar futuro la ganancia es <strong style="color:var(--green)">fija</strong> independientemente del tipo de cambio al vencimiento. Sin futuro el resultado varía según el mercado.
+      </p>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <strong>Aclaración:</strong> Herramienta informativa. No constituye asesoramiento financiero. La cobertura con futuro elimina el riesgo cambiario pero no el riesgo de contraparte (ROFEX) ni el riesgo soberano de la letra. Los contratos de futuro requieren márgenes de garantía que pueden generar llamadas de margen ante movimientos bruscos del tipo de cambio. Consultá con tu asesor financiero antes de operar.
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt  = (n,d=0) => n.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtP = (n,sign=true) => (sign&&n>=0?'+':'')+fmt(n*100,2)+'%';
+const animEl = el => { el.classList.remove('num-in'); void el.offsetWidth; el.classList.add('num-in'); };
+
+const SCENARIOS = [
+  {label:'Baja fuerte',   tcMult: 0.75},
+  {label:'Baja moderada', tcMult: 0.87},
+  {label:'Baja leve',     tcMult: 0.95},
+  {label:'Sin cambio',    isSpot: true},
+  {label:'Sube +5%',      tcMult: 1.05},
+  {label:'Sube +10%',     tcMult: 1.10},
+  {label:'Breakeven',     tcBE:   true},
+  {label:'Sube +20%',     tcMult: 1.20},
+  {label:'Sube +40%',     tcMult: 1.40},
+  {label:'Shock +80%',    tcMult: 1.80},
+];
+
+function calc() {
+  const precio    = parseFloat($('precio').value)   || 0;
+  const vto       = parseFloat($('vto').value)      || 0;
+  const nom       = parseFloat($('nominales').value)|| 0;
+  const spot      = parseFloat($('spot').value)     || 1;
+  const futuro    = parseFloat($('futuro').value)   || 1;
+  const spotFin   = parseFloat($('spotfin').value)  || 1;
+  const dias      = parseFloat($('dias').value)     || 1;
+  const comCV     = parseFloat($('comCV').value)/100   || 0;
+  const comAmort  = parseFloat($('comAmort').value)/100|| 0;
+  const comFut    = parseFloat($('comFut').value)/100  || 0;
+
+  // ── FLUJO BASE ──
+  const compra       = nom * precio / 100;
+  const costoCV      = compra * comCV;
+  const totalDesemb  = compra + costoCV;
+  const usdHoy       = totalDesemb / spot;
+
+  const recibo       = nom * vto / 100;
+  const costoAmort   = recibo * comAmort;
+  const pesosNetos   = recibo - costoAmort;
+
+  // ── CON FUTURO ──
+  const usdBruto     = pesosNetos / futuro;
+  const costoFut     = usdBruto * comFut;
+  const usdNeto      = usdBruto - costoFut;
+  const ganFuturo    = usdNeto - usdHoy;
+  const rendFuturo   = ganFuturo / usdHoy;
+  const teaFuturo    = Math.pow(1 + rendFuturo, 365/dias) - 1;
+
+  // ── SIN FUTURO (estimado) ──
+  const usdSin       = pesosNetos / spotFin;
+  const ganSin       = usdSin - usdHoy;
+  const rendSin      = ganSin / usdHoy;
+  const teaSin       = Math.pow(1 + rendSin, 365/dias) - 1;
+
+  // Breakeven (sin futuro, sin comisión de futuro)
+  const breakeven    = pesosNetos / usdHoy;
+
+  // ── RENDER HERO ──
+  const hGF = $('h-gan-futuro');
+  hGF.textContent = (ganFuturo>=0?'+':'')+'USD '+fmt(Math.abs(ganFuturo),1);
+  hGF.className = 'hero-val ' + (ganFuturo>=0?'pos':'neg');
+  animEl(hGF);
+  $('h-sub-futuro').textContent = 'TC fijado a $'+fmt(futuro,0)+' — resultado garantizado';
+  $('h-tea-futuro').textContent = 'TEA '+fmtP(teaFuturo);
+
+  const hGS = $('h-gan-sin');
+  hGS.textContent = (ganSin>=0?'+':'')+'USD '+fmt(Math.abs(ganSin),1);
+  hGS.className = 'hero-val ' + (ganSin>=0?'pos':'neg');
+  animEl(hGS);
+  $('h-sub-sin').textContent = 'Con TC estimado a $'+fmt(spotFin,0);
+
+  const diff = ganFuturo - ganSin;
+  if (diff > 0) {
+    $('h-diff').textContent = '↑ La cobertura te da USD '+fmt(diff,1)+' extra de seguridad';
+    $('h-diff').style.color = 'var(--text3)';
+  } else {
+    $('h-diff').textContent = '↑ Sin futuro ganarías USD '+fmt(Math.abs(diff),1)+' más (si el TC no se mueve)';
+    $('h-diff').style.color = 'var(--text3)';
+  }
+
+  // ── METRICAS ──
+  $('m-usd-hoy').textContent = 'USD '+fmt(usdHoy,1);
+  $('m-usd-fin').textContent = 'USD '+fmt(usdNeto,1);
+  const pctEl = $('m-rend-pct');
+  pctEl.textContent = fmtP(rendFuturo);
+  pctEl.className = 'm-val ' + (rendFuturo>=0?'pos':'neg');
+  $('m-dias-lbl').textContent = 'en '+Math.round(dias)+' días · con futuro';
+
+  // ── BREAKEVEN ──
+  $('be-val').textContent = '$'+fmt(breakeven,0);
+  $('be-spot-lbl').textContent = '$'+fmt(spot,0);
+
+  const ratio = Math.min(95, Math.max(5, (spot / breakeven) * 55));
+  $('be-fill').style.width = ratio+'%';
+
+  if (spotFin <= breakeven) {
+    $('be-right-lbl').textContent = '✓ TC estimado bajo el breakeven → ganás sin cobertura';
+    $('be-right-lbl').style.color = 'var(--green)';
+    $('be-status').innerHTML = 'Sin cobertura ganarías <strong style="color:var(--green)">'+fmtP(teaSin)+' TEA</strong> si el TC se cumple.';
+  } else {
+    $('be-right-lbl').textContent = '✗ TC estimado sobre el breakeven → perdés sin cobertura';
+    $('be-right-lbl').style.color = 'var(--red)';
+    $('be-status').innerHTML = 'Sin cobertura perderías <strong style="color:var(--red)">USD '+fmt(Math.abs(ganSin),1)+'</strong> si el TC se cumple.';
+  }
+
+  // ── CASH FLOW ──
+  $('cf-compra').textContent   = '$ '+fmt(compra);
+  $('cf-comCV').textContent    = '− $ '+fmt(costoCV);
+  $('cf-total').textContent    = '$ '+fmt(totalDesemb);
+  $('cf-usd-hoy').textContent  = 'USD '+fmt(usdHoy,1)+' al spot';
+  $('cf-recibo').textContent   = '$ '+fmt(recibo);
+  $('cf-comAmort').textContent = '− $ '+fmt(costoAmort);
+  $('cf-neto').textContent     = '$ '+fmt(pesosNetos);
+  $('cf-usd-bruto').textContent= 'USD '+fmt(usdBruto,1);
+  $('cf-comFut').textContent   = '− USD '+fmt(costoFut,2);
+  const cfUsdNeto = $('cf-usd-neto');
+  cfUsdNeto.textContent = 'USD '+fmt(usdNeto,1)+' (+'+ fmt(ganFuturo,1)+' USD)';
+  cfUsdNeto.className = ganFuturo>=0 ? 'pos' : 'neg';
+
+  // ── ESCENARIOS ──
+  const tbody = $('tbody-sc');
+  tbody.innerHTML = '';
+  SCENARIOS.forEach(s => {
+    let tc;
+    if (s.isSpot) tc = spot;
+    else if (s.tcBE) tc = breakeven;
+    else tc = spot * s.tcMult;
+
+    const uSin = pesosNetos / tc;
+    const gSin = uSin - usdHoy;
+    const posSin = gSin >= 0;
+
+    const isBE = s.tcBE;
+    const isSp = s.isSpot;
+    const rowCls = isSp ? 'row-spot' : isBE ? 'row-be' : '';
+
+    let labelHtml = s.label;
+    if (isSp) labelHtml += '<span class="tag t-spot">spot</span>';
+    if (isBE) labelHtml += '<span class="tag t-be">breakeven</span>';
+
+    const tr = document.createElement('tr');
+    if (rowCls) tr.className = rowCls;
+    tr.innerHTML = `
+      <td>${labelHtml}</td>
+      <td>$${fmt(tc,0)}</td>
+      <td class="${posSin?'pos':'neg'}">USD ${fmt(uSin,1)}</td>
+      <td class="${posSin?'pos':'neg'}">${gSin>=0?'+':''}USD ${fmt(gSin,1)}</td>
+      <td class="col-futuro">USD ${fmt(usdNeto,1)}</td>
+      <td class="col-futuro">+USD ${fmt(ganFuturo,1)} <span class="tag t-futuro">fijo</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── BUTTON ──
+function onCalc() {
+  const btn = $('btn-calc');
+  btn.classList.remove('dirty');
+  btn.innerHTML = 'Calcular rendimiento <span class="arrow">→</span>';
+  calc();
+}
+
+function markDirty() {
+  const btn = $('btn-calc');
+  btn.classList.add('dirty');
+  btn.innerHTML = 'Recalcular con nuevos datos <span class="arrow">→</span>';
+}
+
+// Slider
+$('slider-tc').addEventListener('input', function() {
+  $('spotfin').value = this.value;
+  $('slider-lbl').textContent = '$'+parseInt(this.value).toLocaleString('es-AR');
+  markDirty();
+});
+$('spotfin').addEventListener('input', function() {
+  const v = Math.max(900, Math.min(3000, parseFloat(this.value)||1440));
+  $('slider-tc').value = v;
+  $('slider-lbl').textContent = '$'+Math.round(v).toLocaleString('es-AR');
+  markDirty();
+});
+
+['precio','vto','nominales','dias','spot','futuro','comCV','comAmort','comRenta','comFut'].forEach(id => {
+  $(id).addEventListener('input', markDirty);
+});
+
+calc();
+</script>
+</body>
+</html>

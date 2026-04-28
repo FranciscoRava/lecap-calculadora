@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -608,51 +608,94 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
     <div class="card">
       <div class="sec-label">05 <span>FLUJO DE CAJA DETALLADO</span></div>
       <table class="cf-table">
-        <tr><td class="cf-section" colspan="2">HOY — ENTRADA</td></tr>
+
+        <!-- ENTRADA -->
+        <tr><td class="cf-section" colspan="3">HOY — COMPRA DE LETRAS</td></tr>
         <tr>
-          <td>Compra LECAP (nominales × precio/100)</td>
+          <td>Valor de compra de las letras (nominales × precio / 100)</td>
+          <td style="text-align:right; font-size:11px; color:var(--text3); padding-right:8px; white-space:nowrap" id="cf-compra-pct">—</td>
           <td id="cf-compra">—</td>
         </tr>
         <tr>
-          <td style="color:var(--red)">− Comisión compra/venta letras</td>
+          <td style="color:var(--red)">− Comisión compra/venta letras (<span id="cf-comCV-pct-lbl">—</span>% sobre valor de compra)</td>
+          <td></td>
           <td id="cf-comCV" style="color:var(--red)">—</td>
         </tr>
         <tr class="cf-total">
           <td>💸 Total desembolsado en pesos</td>
+          <td></td>
           <td id="cf-total">—</td>
         </tr>
         <tr>
-          <td style="padding-top:8px; color:var(--text3); font-size:11px">÷ Dólar spot</td>
+          <td style="padding-top:8px; color:var(--text3); font-size:11px">÷ Dólar MEP spot → equivalente en USD</td>
+          <td></td>
           <td id="cf-usd-hoy" style="color:var(--gold); font-size:12px; padding-top:8px">—</td>
         </tr>
 
-        <tr><td class="cf-section" colspan="2">AL VENCIMIENTO — PESOS</td></tr>
+        <!-- VENCIMIENTO PESOS -->
+        <tr><td class="cf-section" colspan="3">AL VENCIMIENTO — COBRO DE LA LETRA</td></tr>
         <tr>
-          <td>Cobro LECAP (nominales × VTO/100)</td>
+          <td>Valor bruto al vencimiento (nominales × VTO / 100)</td>
+          <td style="text-align:right; font-size:11px; color:var(--text3); padding-right:8px"></td>
           <td id="cf-recibo">—</td>
         </tr>
         <tr>
-          <td style="color:var(--red)">− Comisión amortización</td>
+          <td style="color:var(--red)">− Comisión amortización (<span id="cf-comAmort-pct-lbl">—</span>% sobre capital amortizado)</td>
+          <td></td>
           <td id="cf-comAmort" style="color:var(--red)">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text3)">− Comisión renta (<span id="cf-comRenta-pct-lbl">—</span>% sobre intereses cobrados — LECAP = $0)</td>
+          <td></td>
+          <td id="cf-comRenta-val" style="color:var(--text3)">$0</td>
         </tr>
         <tr class="cf-total">
           <td>💰 Pesos netos al vencimiento</td>
+          <td></td>
           <td id="cf-neto">—</td>
         </tr>
 
-        <tr><td class="cf-section" colspan="2">AL VENCIMIENTO — DOLARIZACIÓN VÍA FUTURO</td></tr>
+        <!-- DOLARIZACIÓN -->
+        <tr><td class="cf-section" colspan="3">AL VENCIMIENTO — DOLARIZACIÓN VÍA FUTURO</td></tr>
         <tr>
-          <td>Pesos netos ÷ precio futuro pactado</td>
+          <td>Pesos netos ÷ precio futuro pactado ($<span id="cf-futuro-lbl">—</span>)</td>
+          <td></td>
           <td id="cf-usd-bruto">—</td>
         </tr>
         <tr>
-          <td style="color:var(--red)">− Comisión futuros</td>
+          <td style="color:var(--red)">− Comisión operación futuros (<span id="cf-comFut-pct-lbl">—</span>% sobre USD brutos)</td>
+          <td></td>
           <td id="cf-comFut" style="color:var(--red)">—</td>
         </tr>
         <tr class="cf-total">
           <td>✅ USD netos — renta asegurada</td>
+          <td></td>
           <td id="cf-usd-neto" class="pos">—</td>
         </tr>
+
+        <!-- RESUMEN COMISIONES -->
+        <tr><td class="cf-section" colspan="3">RESUMEN DE COMISIONES TOTALES</td></tr>
+        <tr>
+          <td style="color:var(--text2)">Comisión compra/venta letras</td>
+          <td style="text-align:right; font-size:11px; color:var(--text3); padding-right:8px" id="cf-res-cv-pct">—</td>
+          <td id="cf-res-cv" style="color:var(--red)">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text2)">Comisión amortización</td>
+          <td style="text-align:right; font-size:11px; color:var(--text3); padding-right:8px" id="cf-res-amort-pct">—</td>
+          <td id="cf-res-amort" style="color:var(--red)">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text2)">Comisión futuros</td>
+          <td style="text-align:right; font-size:11px; color:var(--text3); padding-right:8px" id="cf-res-fut-pct">—</td>
+          <td id="cf-res-fut" style="color:var(--red)">—</td>
+        </tr>
+        <tr class="cf-total">
+          <td>Total comisiones (en USD)</td>
+          <td></td>
+          <td id="cf-res-total" style="color:var(--red)">—</td>
+        </tr>
+
       </table>
     </div>
   </div>
@@ -796,18 +839,39 @@ function calc() {
   }
 
   // ── CASH FLOW ──
-  $('cf-compra').textContent   = '$ '+fmt(compra);
-  $('cf-comCV').textContent    = '− $ '+fmt(costoCV);
-  $('cf-total').textContent    = '$ '+fmt(totalDesemb);
-  $('cf-usd-hoy').textContent  = 'USD '+fmt(usdHoy,1)+' al spot';
-  $('cf-recibo').textContent   = '$ '+fmt(recibo);
-  $('cf-comAmort').textContent = '− $ '+fmt(costoAmort);
-  $('cf-neto').textContent     = '$ '+fmt(pesosNetos);
-  $('cf-usd-bruto').textContent= 'USD '+fmt(usdBruto,1);
-  $('cf-comFut').textContent   = '− USD '+fmt(costoFut,2);
+  $('cf-compra').textContent        = '$ '+fmt(compra);
+  $('cf-comCV-pct-lbl').textContent = fmt(comCV*100,2);
+  $('cf-comCV').textContent         = '− $ '+fmt(costoCV);
+  $('cf-total').textContent         = '$ '+fmt(totalDesemb);
+  $('cf-usd-hoy').textContent       = 'USD '+fmt(usdHoy,1)+' al spot';
+
+  $('cf-recibo').textContent        = '$ '+fmt(recibo);
+  $('cf-comAmort-pct-lbl').textContent = fmt(comAmort*100,2);
+  $('cf-comAmort').textContent      = '− $ '+fmt(costoAmort);
+  $('cf-comRenta-pct-lbl').textContent = fmt(parseFloat($('comRenta').value),2);
+  $('cf-comRenta-val').textContent  = '$0 (cupón cero)';
+  $('cf-neto').textContent          = '$ '+fmt(pesosNetos);
+
+  $('cf-futuro-lbl').textContent    = fmt(futuro,0);
+  $('cf-usd-bruto').textContent     = 'USD '+fmt(usdBruto,1);
+  $('cf-comFut-pct-lbl').textContent = fmt(comFut*100,2);
+  $('cf-comFut').textContent        = '− USD '+fmt(costoFut,2);
   const cfUsdNeto = $('cf-usd-neto');
-  cfUsdNeto.textContent = 'USD '+fmt(usdNeto,1)+' (+'+ fmt(ganFuturo,1)+' USD)';
+  cfUsdNeto.textContent = 'USD '+fmt(usdNeto,1)+'  (+'+ fmt(ganFuturo,1)+' USD ganancia)';
   cfUsdNeto.className = ganFuturo>=0 ? 'pos' : 'neg';
+
+  // Resumen comisiones en USD
+  const comCVusd    = costoCV / spot;
+  const comAmortusd = costoAmort / futuro;
+  const comFutusd   = costoFut;
+  const totalComusd = comCVusd + comAmortusd + comFutusd;
+  $('cf-res-cv').textContent       = '− USD '+fmt(comCVusd,2);
+  $('cf-res-cv-pct').textContent   = fmt(comCV*100,2)+'% c/v';
+  $('cf-res-amort').textContent    = '− USD '+fmt(comAmortusd,2);
+  $('cf-res-amort-pct').textContent= fmt(comAmort*100,2)+'% amort.';
+  $('cf-res-fut').textContent      = '− USD '+fmt(comFutusd,2);
+  $('cf-res-fut-pct').textContent  = fmt(comFut*100,2)+'% futuros';
+  $('cf-res-total').textContent    = '− USD '+fmt(totalComusd,2);
 
   // ── ESCENARIOS ──
   const tbody = $('tbody-sc');
@@ -879,3 +943,4 @@ calc();
 </script>
 </body>
 </html>
+
